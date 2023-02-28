@@ -1,6 +1,88 @@
 # <div align = "center"> COMP353 Homework 1 </div>
 ## <div align = "center"> Sam Bernau & Shane Lievens </div>
 
+## DDL/DML Script 
+```sql
+CREATE TABLE recording_label(
+	label_id varchar(50) PRIMARY KEY,
+	label_name varchar(50) NOT NULL,
+	location varchar(50) NOT NULL
+);
+
+CREATE TABLE artist(
+	artist_id varchar(50) PRIMARY KEY,
+	first_name varchar(50) NOT NULL,
+	last_name varchar(50) NOT NULL,
+	year_born numeric NOT NULL
+);
+
+CREATE TABLE musical_Group(
+	group_code varchar(50) PRIMARY KEY,
+	group_name varchar(50) NOT NULL
+);
+
+CREATE TABLE cd(
+	cd_code varchar(50) PRIMARY KEY,
+	cd_title varchar(50) NOT NULL,
+	number_sold numeric NOT NULL,
+	year numeric NOT NULL,
+	label_id varchar(50) NOT NULL,
+	FOREIGN KEY(label_id) REFERENCES recording_label(label_id),
+	group_code varchar(50) NOT NULL,
+	FOREIGN KEY(group_code) REFERENCES musical_group(group_code)
+);
+
+CREATE TABLE song(
+	song_code varchar(50) PRIMARY KEY,
+	song_title varchar(50) NOT NULL
+);
+
+CREATE TABLE top_CDs(
+	cd_code varchar(50) NOT NULL,
+	FOREIGN KEY (cd_code) REFERENCES cd(cd_code),
+	year numeric NOT NULL,
+	PRIMARY KEY(cd_code, year),
+	rating numeric NOT NULL
+);
+
+CREATE TABLE composed_of(
+	cd_code varchar(50) NOT NULL,
+	FOREIGN KEY(cd_code) REFERENCES cd(cd_code),
+	song_code varchar(50) NOT NULL,
+	FOREIGN KEY(song_code) REFERENCES song(song_code),
+	PRIMARY KEY (cd_code, song_code),
+	track_number numeric NOT NULL
+);
+
+CREATE TABLE top_songs(
+	song_code varchar(50) NOT NULL,
+	FOREIGN KEY(song_code) REFERENCES song(song_code),
+	year numeric NOT NULL,
+	PRIMARY KEY(song_code, year),
+	rating numeric NOT NULL
+);
+
+CREATE TABLE member(
+	group_code varchar(50) NOT NULL,
+	FOREIGN KEY(group_code) REFERENCES musical_group(group_code),
+	artist_id varchar(50) NOT NULL,
+	FOREIGN KEY(artist_id) REFERENCES artist(artist_id),
+	from_date numeric NOT NULL,
+	PRIMARY KEY(group_code, artist_id, from_date),
+	to_date numeric NOT NULL
+);
+
+CREATE TABLE written_by(
+	song_code varchar(50) NOT NULL,
+	FOREIGN KEY (song_code) REFERENCES song(song_code),
+	artist_id varchar(50) NOT NULL,
+	FOREIGN KEY(artist_id) REFERENCES artist(artist_id),
+	PRIMARY KEY(song_code, artist_id)
+);
+```
+
+### Homework Answers
+
 #### 1. [16 points] List the songs written by artists born no later than 1975, order the list by songTitle in ascending order. (songTitle, firstName, lastName, yearBorn)
 ##### Query 
 ```sql
