@@ -1,0 +1,156 @@
+# <div align = "center"> COMP353 Homework 1 </div>
+## <div align = "center"> Sam Bernau & Shane Lievens </div>
+
+#### 1. [16 points] List the songs written by artists born no later than 1975, order the list by songTitle in ascending order. (songTitle, firstName, lastName, yearBorn)
+##### Query 
+```sql
+SELECT song_title, first_name, last_name, year_born 
+FROM song S, written_by W , artist A 
+WHERE S.song_code = W.song_code --make sure song_code's match between tables
+AND W.artist_id = A.artist_id --make sure artist_id's match between tables
+AND A.year_born <= 1975 
+ORDER BY song_title ASC;
+```
+##### Query Output
+| song\_title             | first\_name | last\_name | year\_born |
+|:------------------------|:------------|:-----------|:-----------|
+| Another Day in Paradise | Henry       | Brown      | 1966       |
+| Breathless              | Francis     | McDermott  | 1960       |
+| Broken                  | Lisa        | Raymond    | 1973       |
+| Days Go By              | Michael     | Agnelo     | 1975       |
+| Fire                    | Lisa        | Raymond    | 1973       |
+| Forgotten               | Heidi       | Helmut     | 1945       |
+| Forgotten               | Bjorn       | Friedman   | 1945       |
+| Goldilocks              | Lisa        | Raymond    | 1973       |
+| Goodnight               | Bjorn       | Friedman   | 1945       |
+| Hot As Hell             | John        | Stark      | 1971       |
+| How Could You           | Heidi       | Helmut     | 1945       |
+| I Have A Dream          | John        | Stark      | 1971       |
+| Life Or Death           | Janet       | Brown      | 1972       |
+| Mamma Mia               | Lisa        | Raymond    | 1973       |
+| My Lullaby              | John        | Hopkins    | 1960       |
+| My Oh My                | Steve       | Nash       | 1965       |
+| One Of Us               | Lisa        | Raymond    | 1973       |
+| Ooh La La               | Steve       | Nash       | 1965       |
+| Smile                   | Jim         | Kate       | 1970       |
+| Sweet Dreams            | Bjorn       | Friedman   | 1945       |
+
+#### 2. [16 points] For every artist, find the number of songs rated top 10. List the count of songsin descending order.(firstName, lastName, countOfTopSong)
+##### Query
+```sql
+SELECT artist.first_name,artist.last_name, COUNT(*) AS top_10_count
+FROM song
+         INNER JOIN written_by ON song.song_code = written_by.song_code
+         INNER JOIN artist ON written_by.artist_id = artist.artist_id
+         INNER JOIN top_songs ON song.song_code = top_songs.song_code
+WHERE top_songs.rating >= 10
+GROUP BY artist.first_name, artist.last_name
+ORDER BY top_10_count DESC;
+```
+##### Query Output
+| first\_name | last\_name | top_10_count |
+|:------------|:-----------|:-------------|
+| John        | Stark      | 1            |
+| Henry       | Brown      | 1            |
+
+#### 3. [17 points] List the maximum, minimum, and average of cdSold per artist. Order by the artist’s first name in ascending order (firstName, lastName, maxNumber, minNumber, avgNumber)
+##### Query
+```sql
+SELECT A.first_name, A.last_name, MAX(cd.number_sold) as max_sold, MIN(cd.number_sold) as min_sold, ROUND(AVG(cd.number_sold), 2) as avg_sold
+FROM artist A
+JOIN member M ON A.artist_id = M.artist_id
+JOIN musical_group MG on M.group_code = MG.group_code
+JOIN cd ON cd.group_code = MG.group_code
+GROUP BY A.first_name, A.last_name
+order by A.first_name;
+```
+##### Query Output
+| first\_name | last\_name | max\_sold | min\_sold | avg\_sold |
+|:------------|:-----------|:----------|:----------|:----------|
+| Bjorn       | Friedman   | 800000    | 40000     | 378000    |
+| Francis     | McDermott  | 800000    | 750000    | 775000    |
+| Heidi       | Helmut     | 500000    | 40000     | 270000    |
+| Henry       | Brown      | 800000    | 25000     | 402666.67 |
+| Jacky       | Chen       | 800000    | 100000    | 450000    |
+| Janet       | Brown      | 800000    | 40000     | 421111.11 |
+| John        | Stark      | 500000    | 40000     | 270000    |
+| Keith       | Urban      | 900000    | 89000     | 465600    |
+| Lisa        | Raymond    | 500000    | 40000     | 270000    |
+| Michael     | Agnelo     | 900000    | 89000     | 459750    |
+| Michelle    | Agnelo     | 800000    | 100000    | 450000    |
+| Steve       | Nash       | 800000    | 750000    | 775000    |
+
+#### 4. [17 points] How many top songs has each recording label produced? Order by the number of songs in descending order. 
+- Note: In this database, a song can be part of multiple CDs 
+- Hint: Use Distinct to get the most accurate result. (labelName, numberOfSong)
+##### Query
+```sql
+SELECT DISTINCT label_name, COUNT(DISTINCT top_songs.song_code) as number_of_song
+FROM recording_label
+         JOIN cd ON recording_label.label_id = cd.label_id
+         JOIN composed_of ON composed_of.cd_code = cd.cd_code
+         JOIN top_songs ON top_songs.song_code = composed_of.song_code
+GROUP BY recording_label.label_id
+ORDER BY number_of_song DESC;
+```
+##### Query Output
+| label\_name            | number\_of\_song |
+|:-----------------------|:-----------------|
+| A&M Records            | 11               |
+| Disney Records         | 10               |
+| Reprise Records        | 9                |
+| Universal Records      | 6                |
+| Disney Records         | 4                |
+| Gray Dot Records       | 4                |
+| Country Club           | 3                |
+| Parkwood Entertainment | 1                |
+#### 5. [17 points] Identify the artists that don’t have a top 5 song and were born no later than 1960 (firstName, lastName, yearBorn)
+##### Query
+```sql
+SELECT DISTINCT first_name, last_name, year_born
+FROM artist
+         LEFT JOIN written_by ON artist.artist_id = written_by.artist_id
+         LEFT JOIN top_songs ON written_by.song_code = top_songs.song_code
+WHERE rating > 5 OR rating IS NULL
+AND year_born <= 1960;
+```
+##### Query Output
+| first\_name | last\_name | year\_born |
+|:------------|:-----------|:-----------|
+| Henry       | Brown      | 1966       |
+| John        | Stark      | 1971       |
+| Francis     | McDermott  | 1960       |
+| Jacky       | Chen       | 1945       |
+| John        | Hopkins    | 1960       |
+#### 6. [17 points] Identify the artists that have at least 2 top songs and at least 1 top cd. (artistID, firstName, lastName, countOfTopSongs, countOfTopCDs)
+##### Query
+```sql
+SELECT
+    artist.artist_id,
+    artist.first_name,
+    artist.last_name,
+    COUNT(DISTINCT top_songs.song_code) AS count_of_top_songs,
+    COUNT(DISTINCT top_cds.cd_code) AS count_of_top_cds
+FROM
+    artist
+        JOIN written_by ON artist.artist_id = written_by.artist_id
+        JOIN top_songs ON written_by.song_code = top_songs.song_code
+        JOIN composed_of  ON written_by.song_code = composed_of.song_code
+        JOIN cd  ON composed_of.cd_code = cd.cd_code
+        JOIN top_cds  ON cd.cd_code = top_cds.cd_code AND top_cds.year = cd.year
+GROUP BY
+    artist.artist_id,
+    artist.first_name,
+    artist.last_name
+HAVING
+    COUNT(DISTINCT top_songs.song_code) >= 2 AND COUNT(DISTINCT top_cds.cd_code) >= 1;
+```
+##### Query Output
+| artist\_id | first\_name | last\_name | count\_of\_top\_songs | count\_of\_top\_cds |
+|:-----------|:------------|:-----------|:----------------------|:--------------------|
+| A1         | Bjorn       | Friedman   | 3                     | 7                   |
+| A2         | Heidi       | Helmut     | 2                     | 3                   |
+| A3         | John        | Stark      | 2                     | 6                   |
+| A8         | Lisa        | Raymond    | 4                     | 5                   |
+
+
