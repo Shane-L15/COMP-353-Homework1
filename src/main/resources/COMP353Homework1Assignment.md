@@ -86,12 +86,12 @@ CREATE TABLE written_by(
 #### 1. [16 points] List the songs written by artists born no later than 1975, order the list by songTitle in ascending order. (songTitle, firstName, lastName, yearBorn)
 ##### Query 
 ```sql
-SELECT song_title, first_name, last_name, year_born 
-FROM song S, written_by W , artist A 
-WHERE S.song_code = W.song_code --make sure song_code's match between tables
-AND W.artist_id = A.artist_id --make sure artist_id's match between tables
-AND A.year_born <= 1975 
-ORDER BY song_title ASC;
+SELECT song."songTitle", "artist"."firstName", "artist"."lastName", "artist"."yearBorn"
+FROM song
+JOIN "writtenBy" ON song."songCode" = "writtenBy"."songCode"
+JOIN "artist" ON "writtenBy"."artistID" = "artist"."artistID"
+WHERE "artist"."yearBorn" <= 1975
+ORDER BY song."songTitle" ASC;
 ```
 ##### Query Output
 | song\_title             | first\_name | last\_name | year\_born |
@@ -120,14 +120,14 @@ ORDER BY song_title ASC;
 #### 2. [16 points] For every artist, find the number of songs rated top 10. List the count of songsin descending order.(firstName, lastName, countOfTopSong)
 ##### Query
 ```sql
-SELECT artist.first_name,artist.last_name, COUNT(*) AS top_10_count
-FROM song
-         INNER JOIN written_by ON song.song_code = written_by.song_code
-         INNER JOIN artist ON written_by.artist_id = artist.artist_id
-         INNER JOIN top_songs ON song.song_code = top_songs.song_code
-WHERE top_songs.rating >= 10
-GROUP BY artist.first_name, artist.last_name
-ORDER BY top_10_count DESC;
+SELECT artist."firstName", artist."lastName", COUNT(DISTINCT "topSongs"."songCode") as countOfTopSong
+FROM artist
+INNER JOIN "writtenBy" ON artist."artistID" = "writtenBy"."artistID"
+INNER JOIN "song" ON "writtenBy"."songCode" = "song"."songCode"
+INNER JOIN "topSongs" ON "song"."songCode" = "topSongs"."songCode"
+WHERE "topSongs"."rating" >= 10
+GROUP BY artist."artistID"
+ORDER BY countOfTopSong DESC;
 ```
 ##### Query Output
 | first\_name | last\_name | top_10_count |
@@ -138,13 +138,14 @@ ORDER BY top_10_count DESC;
 #### 3. [17 points] List the maximum, minimum, and average of cdSold per artist. Order by the artist’s first name in ascending order (firstName, lastName, maxNumber, minNumber, avgNumber)
 ##### Query
 ```sql
-SELECT A.first_name, A.last_name, MAX(cd.number_sold) as max_sold, MIN(cd.number_sold) as min_sold, ROUND(AVG(cd.number_sold), 2) as avg_sold
-FROM artist A
-JOIN member M ON A.artist_id = M.artist_id
-JOIN musical_group MG on M.group_code = MG.group_code
-JOIN cd ON cd.group_code = MG.group_code
-GROUP BY A.first_name, A.last_name
-order by A.first_name;
+SELECT "artist"."firstName", "artist"."lastName", MAX(cd."numberSold") AS maxNumber, 
+	MIN(cd."numberSold") AS minNumber, AVG(cd."numberSold") AS avgNumber
+FROM cd
+INNER JOIN "musicalGroup" ON "cd"."groupCode" = "musicalGroup"."groupCode"
+INNER JOIN "member" ON "musicalGroup"."groupCode" = "member"."groupCode"
+INNER JOIN "artist" ON "member"."artistID" = "artist"."artistID"
+GROUP BY "artist"."firstName", "artist"."lastName"
+ORDER BY "artist"."firstName" ASC;
 ```
 ##### Query Output
 | first\_name | last\_name | max\_sold | min\_sold | avg\_sold |
