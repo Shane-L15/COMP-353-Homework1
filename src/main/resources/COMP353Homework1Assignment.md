@@ -190,11 +190,10 @@ ORDER BY number_of_song DESC;
 ##### Query
 ```sql
 SELECT DISTINCT first_name, last_name, year_born
-FROM artist
-         LEFT JOIN written_by ON artist.artist_id = written_by.artist_id
-         LEFT JOIN top_songs ON written_by.song_code = top_songs.song_code
-WHERE rating > 5 OR rating IS NULL
-AND year_born <= 1960;
+FROM top_songs T, written_by S, artist
+WHERE artist.artist_id = S.artist_id AND year_born <= 1960
+GROUP BY artist.first_name, last_name, year_born, T.rating
+HAVING T.rating > 5;
 ```
 ##### Query Output
 | first\_name | last\_name | year\_born |
