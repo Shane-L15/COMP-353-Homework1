@@ -198,11 +198,10 @@ HAVING T.rating > 5;
 ##### Query Output
 | first\_name | last\_name | year\_born |
 |:------------|:-----------|:-----------|
-| Henry       | Brown      | 1966       |
-| John        | Stark      | 1971       |
-| Francis     | McDermott  | 1960       |
-| Jacky       | Chen       | 1945       |
 | John        | Hopkins    | 1960       |
+| Francis     | McDermott  | 1960       |
+| Bjorn       | Friedman   | 1945       |
+| Heidi       | Helmut     | 1945       |
 #### 6. [17 points] Identify the artists that have at least 2 top songs and at least 1 top cd. (artistID, firstName, lastName, countOfTopSongs, countOfTopCDs)
 ##### Query
 ```sql
